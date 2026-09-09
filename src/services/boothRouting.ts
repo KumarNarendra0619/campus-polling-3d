@@ -1,4 +1,4 @@
-import { Cartesian3, HeadingPitchRange, Viewer } from 'cesium'
+import { Cartesian3, Viewer } from 'cesium'
 import type { PollingBooth } from '../types/pollingBooth'
 
 export function findBooth(booths: PollingBooth[], boothId: string) {
@@ -7,15 +7,17 @@ export function findBooth(booths: PollingBooth[], boothId: string) {
 }
 
 export function flyToBooth(viewer: Viewer, booth: PollingBooth) {
-  return viewer.flyTo(
-    viewer.entities.getById(booth.booth_id) ?? viewer.entities,
-    {
-      offset: new HeadingPitchRange(0, -0.65, 80),
-      duration: 1.2,
-    },
-  )
+  return viewer.camera.flyTo({
+    destination: Cartesian3.fromDegrees(booth.longitude, booth.latitude, 120),
+    orientation: { heading: 0, pitch: -0.75, roll: 0 },
+    duration: 1.2,
+  })
 }
 
 export function boothPosition(booth: PollingBooth) {
   return Cartesian3.fromDegrees(booth.longitude, booth.latitude)
+}
+
+export function boothRoutePath(boothId: string) {
+  return `/booth/${encodeURIComponent(boothId.trim().toUpperCase())}`
 }

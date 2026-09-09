@@ -1,1 +1,21 @@
-{"type":"FeatureCollection","features":[]}
+{
+  "type": "FeatureCollection",
+  "name": "HNBGU_Birla_Campus_3D_Buildings_Demo",
+  "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+  "metadata": {
+    "campus": "Birla Campus, Srinagar",
+    "purpose": "STEP-12 3D integration demo",
+    "geometry_status": "Approximate demo footprints around OSM-reference building locations; replace with verified footprints",
+    "source": "OpenStreetMap reference locations",
+    "verified": false,
+    "warning": "DEMO GEOMETRY — not suitable for navigation or field verification"
+  },
+  "features": [
+    {"type":"Feature","properties":{"building_id":"B-ACL","building_name":"ACL Building","building_type":"academic","floors":2,"height_m":8,"source":"OSM reference + demo footprint","verified":false,"dummy":true},"geometry":{"type":"Polygon","coordinates":[[[78.78262,30.22146],[78.78292,30.22146],[78.78292,30.22170],[78.78262,30.22170],[78.78262,30.22146]]]}},
+    {"type":"Feature","properties":{"building_id":"B-SS","building_name":"Social Science Building","building_type":"academic","floors":2,"height_m":8,"source":"OSM reference + demo footprint","verified":false,"dummy":true},"geometry":{"type":"Polygon","coordinates":[[[78.78365,30.22196],[78.78403,30.22196],[78.78403,30.22225],[78.78365,30.22225],[78.78365,30.22196]]]}},
+    {"type":"Feature","properties":{"building_id":"B-OAB","building_name":"Arts Building (Old)","building_type":"academic","floors":1,"height_m":5,"source":"OSM reference + demo footprint","verified":false,"dummy":true},"geometry":{"type":"Polygon","coordinates":[[[78.78374,30.22153],[78.78408,30.22153],[78.78408,30.22177],[78.78374,30.22177],[78.78374,30.22153]]]}},
+    {"type":"Feature","properties":{"building_id":"B-BPED","building_name":"Department of Physical Education / B.P.Ed.","building_type":"academic","floors":1,"height_m":5,"source":"OSM reference + demo footprint","verified":false,"dummy":true},"geometry":{"type":"Polygon","coordinates":[[[78.78305,30.22137],[78.78338,30.22137],[78.78338,30.22161],[78.78305,30.22161],[78.78305,30.22137]]]}},
+    {"type":"Feature","properties":{"building_id":"B-BOT","building_name":"Botany / Life Sciences Lab","building_type":"laboratory","floors":1,"height_m":5,"source":"Campus department reference + demo footprint","verified":false,"dummy":true},"geometry":{"type":"Polygon","coordinates":[[[78.78298,30.22105],[78.78327,30.22105],[78.78327,30.22128],[78.78298,30.22128],[78.78298,30.22105]]]}},
+    {"type":"Feature","properties":{"building_id":"B-SAC","building_name":"Student Activity Centre / Senate Hall","building_type":"administrative","floors":5,"height_m":20,"source":"OSM + HNBGU official reference + demo footprint","verified":false,"dummy":true},"geometry":{"type":"Polygon","coordinates":[[[78.78168,30.22092],[78.78208,30.22092],[78.78208,30.22123],[78.78168,30.22123],[78.78168,30.22092]]]}}
+  ]
+}

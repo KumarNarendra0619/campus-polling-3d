@@ -1,4 +1,4 @@
-import { Cartesian3, Color, LabelStyle, VerticalOrigin } from 'cesium'
+import { Cartesian3, Color, GeoJsonDataSource, LabelStyle, VerticalOrigin } from 'cesium'
 import type { PollingBooth } from '../types/pollingBooth'
 import { validatePollingBooths } from '../validation/pollingBoothValidation'
 
@@ -24,7 +24,7 @@ export async function loadPollingBooths(): Promise<PollingBooth[]> {
 }
 
 export function createBoothDataSource(booths: PollingBooth[]) {
-  const dataSource = new (requireCesiumGeoJsonDataSource())('Polling Booths')
+  const dataSource = new GeoJsonDataSource('Polling Booths')
 
   for (const booth of booths) {
     if (booth.latitude === null || booth.longitude === null) continue
@@ -68,10 +68,4 @@ export function createBoothDataSource(booths: PollingBooth[]) {
   }
 
   return dataSource
-}
-
-// Kept local so the rest of the service does not depend on GeoJSON geometry being present.
-function requireCesiumGeoJsonDataSource() {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  return require('cesium').CustomDataSource
 }

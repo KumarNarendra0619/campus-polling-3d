@@ -1,33 +1,33 @@
-:root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #0f172a;
-  background: #e2e8f0;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-}
-
+:root { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #0f172a; background: #e2e8f0; font-synthesis: none; text-rendering: optimizeLegibility; }
 * { box-sizing: border-box; }
 html, body, #root { width: 100%; height: 100%; margin: 0; }
 body { min-width: 320px; }
+button, a { font: inherit; }
 .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-.app-header { min-height: 72px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #0f172a; color: #fff; z-index: 2; }
+.app-header { min-height: 64px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #0f172a; color: #fff; z-index: 4; }
 .eyebrow { margin: 0 0 2px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
-h1 { margin: 0; font-size: 20px; line-height: 1.2; }
+h1 { margin: 0; font-size: 19px; line-height: 1.2; }
 .version { font-size: 12px; opacity: .75; white-space: nowrap; }
 .viewer-section { position: relative; flex: 1; min-height: 0; }
 .cesium-container { position: absolute; inset: 0; }
-.viewer-status { position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px); padding: 8px 10px; border-radius: 8px; background: rgba(15, 23, 42, .88); color: #fff; font-size: 12px; z-index: 1; }
+.viewer-status { position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px); padding: 8px 10px; border-radius: 8px; background: rgba(15, 23, 42, .88); color: #fff; font-size: 12px; z-index: 2; }
 .data-path { margin-top: 3px; opacity: .7; font-size: 10px; }
-.booth-card { position: absolute; top: 16px; right: 16px; width: min(340px, calc(100% - 32px)); padding: 18px; border-radius: 12px; background: rgba(255,255,255,.96); box-shadow: 0 8px 30px rgba(15,23,42,.25); z-index: 3; }
-.booth-card h2 { margin: 3px 0 12px; font-size: 20px; }
+.booth-card { position: absolute; top: 12px; right: 12px; width: min(360px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow-y: auto; padding: 18px; border-radius: 14px; background: rgba(255,255,255,.97); box-shadow: 0 10px 32px rgba(15,23,42,.25); z-index: 3; }
+.booth-card h2 { margin: 3px 0 12px; font-size: 20px; line-height: 1.25; }
 .booth-card p { margin: 6px 0; font-size: 13px; }
 .booth-kicker { color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; font-size: 11px !important; }
-.booth-close { position: absolute; top: 8px; right: 10px; border: 0; background: transparent; font-size: 25px; cursor: pointer; color: #475569; }
+.booth-close { position: absolute; top: 7px; right: 9px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #f1f5f9; font-size: 24px; cursor: pointer; color: #475569; }
 .verified, .unverified { display: inline-block; margin-top: 10px; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #dcfce7; color: #166534; }
 .unverified { background: #ffedd5; color: #9a3412; }
+.ground-view { margin-top: 14px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+.ground-view p { color: #64748b; margin: 4px 0 9px; font-size: 12px; }
+.ground-view-button, .navigation-button { display: block; width: 100%; min-height: 44px; margin-top: 8px; padding: 11px 14px; border: 0; border-radius: 9px; text-align: center; text-decoration: none; font-weight: 700; cursor: pointer; }
+.ground-view-button { background: #e2e8f0; color: #0f172a; }
+.navigation-button { background: #0f172a; color: #fff; }
+.navigation-button:disabled { opacity: .45; cursor: not-allowed; }
 @media (max-width: 640px) {
-  .app-header { min-height: 64px; padding: 10px 14px; }
-  h1 { font-size: 18px; }
   .version { display: none; }
-  .booth-card { top: 10px; right: 10px; width: calc(100% - 20px); }
+  .booth-card { top: auto; right: 8px; bottom: 8px; width: calc(100% - 16px); max-height: 58%; padding: 15px; border-radius: 14px; }
+  .viewer-status { left: 8px; bottom: calc(58% + 18px); font-size: 11px; }
+  .cesium-container { padding-bottom: 0; }
 }

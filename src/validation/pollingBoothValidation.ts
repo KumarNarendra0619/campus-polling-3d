@@ -1,7 +1,7 @@
 import type { PollingBooth } from '../types/pollingBooth'
 
 const VALID_STATUSES = new Set<PollingBooth['status']>(['active', 'inactive', 'temporary', 'closed'])
-const BOOTH_ID_PATTERN = /^PB\d{1,2}$/i
+const BOOTH_ID_PATTERN = /^PB(\d{1,2})$/i
 
 export interface BoothValidationResult {
   validBooths: PollingBooth[]
@@ -17,9 +17,11 @@ function validCoordinate(value: unknown, min: number, max: number) {
 function validateBooth(booth: Partial<PollingBooth>, index: number): string[] {
   const errors: string[] = []
   const label = booth.booth_id || `record ${index + 1}`
+  const match = typeof booth.booth_id === 'string' ? booth.booth_id.trim().match(BOOTH_ID_PATTERN) : null
+  const boothNumber = match ? Number(match[1]) : NaN
 
-  if (typeof booth.booth_id !== 'string' || !BOOTH_ID_PATTERN.test(booth.booth_id.trim())) {
-    errors.push(`${label}: invalid booth_id; expected PB01–PB14 format.`)
+  if (!match || !Number.isInteger(boothNumber) || boothNumber < 1 || boothNumber > 14) {
+    errors.push(`${label}: invalid booth_id; expected PB01–PB14.`)
   }
   for (const [field, value] of [
     ['booth_no', booth.booth_no],

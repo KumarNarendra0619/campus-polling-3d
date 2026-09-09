@@ -1,0 +1,74 @@
+import { Cartesian3, Color, GeoJsonDataSource, LabelStyle, VerticalOrigin } from 'cesium'
+import type { PollingBooth } from '../types/pollingBooth'
+
+const DATA_URL = '/data/polling_booths.geojson'
+
+export async function loadPollingBooths(): Promise<PollingBooth[]> {
+  const response = await fetch(DATA_URL)
+  if (!response.ok) {
+    throw new Error(`Polling booth data request failed: ${response.status}`)
+  }
+
+  const json = await response.json()
+  if (json?.type !== 'FeatureCollection' || !Array.isArray(json.features)) {
+    throw new Error('Invalid polling_booths.geojson: expected a FeatureCollection.')
+  }
+
+  return json.features
+    .filter((feature: any) => feature?.geometry?.type === 'Point' && feature?.properties?.booth_id)
+    .map((feature: any) => {
+      const coordinates = feature.geometry.coordinates
+      const properties = feature.properties
+      return {
+        ...properties,
+        longitude: Number(properties.longitude ?? coordinates[0]),
+        latitude: Number(properties.latitude ?? coordinates[1]),
+        navigation_lat: Number(properties.navigation_lat),
+        navigation_lon: Number(properties.navigation_lon),
+      } as PollingBooth
+    })
+}
+
+export function createBoothDataSource(booths: PollingBooth[]) {
+  const dataSource = new GeoJsonDataSource('Polling Booths')
+
+  for (const booth of booths) {
+    const entity = dataSource.entities.add({
+      id: booth.booth_id,
+      position: Cartesian3.fromDegrees(booth.longitude, booth.latitude),
+      point: {
+        pixelSize: 14,
+        color: booth.verified ? Color.RED : Color.ORANGE,
+        outlineColor: Color.WHITE,
+        outlineWidth: 2,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+      label: {
+        text: `PB${booth.booth_no}`,
+        font: '600 14px sans-serif',
+        fillColor: Color.WHITE,
+        outlineColor: Color.BLACK,
+        outlineWidth: 3,
+        style: LabelStyle.FILL_AND_OUTLINE,
+        verticalOrigin: VerticalOrigin.BOTTOM,
+        pixelOffset: { x: 0, y: -18 } as any,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+      properties: {
+        booth_id: booth.booth_id,
+        booth_no: booth.booth_no,
+        booth_name: booth.booth_name,
+        building_name: booth.building_name,
+        room_no: booth.room_no,
+        floor: booth.floor,
+        entrance_id: booth.entrance_id,
+        status: booth.status,
+        verified: booth.verified,
+      },
+    })
+
+    entity.name = `${booth.booth_no} — ${booth.booth_name}`
+  }
+
+  return dataSource
+}

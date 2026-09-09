@@ -11,6 +11,10 @@ import type { PollingBooth } from './types/pollingBooth'
 
 const LAYER_ORDER: CampusLayerName[] = ['boundary', 'buildings', 'roads', 'footpaths', 'gates', 'treesGreen', 'amenities']
 
+function safeErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback
+}
+
 function App() {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<Viewer | null>(null)
@@ -32,26 +36,47 @@ function App() {
         let layerCount = 0
         for (const layer of LAYER_ORDER) {
           if (cancelled) return
-          try { await viewer.dataSources.add(await loadGeoJsonLayer(layer)); layerCount += 1 } catch (error) { console.warn(`Could not load ${layer}:`, error) }
+          try {
+            await viewer.dataSources.add(await loadGeoJsonLayer(layer))
+            layerCount += 1
+          } catch (error) {
+            console.warn(`Could not load ${layer}:`, error)
+          }
         }
+
         try {
           const boothRecords = await loadPollingBooths()
           if (cancelled) return
           await viewer.dataSources.add(createBoothDataSource(boothRecords))
           setBooths(boothRecords)
+          const routeId = boothIdFromPath(window.location.pathname)
           const routeBooth = resolveBoothFromPath(window.location.pathname, boothRecords)
-          if (routeBooth) { setSelectedBooth(routeBooth); flyToBooth(viewer, routeBooth) }
-          else if (boothIdFromPath(window.location.pathname)) setStatus(`Campus ready — booth ${boothIdFromPath(window.location.pathname)} was not found.`)
-          else setStatus(`Campus ready — ${layerCount}/7 campus layers · ${boothRecords.length} polling booths.`)
+
+          if (routeBooth) {
+            setSelectedBooth(routeBooth)
+            flyToBooth(viewer, routeBooth)
+            setStatus(`Booth ${routeBooth.booth_no} loaded — verified navigation record.`)
+          } else if (routeId) {
+            setStatus(`Booth ${routeId} was not found. Check the booth QR/link and choose a valid booth.`)
+          } else if (boothRecords.length === 0) {
+            setStatus(`Campus ready — ${layerCount}/7 campus layers. Polling booth records are not available yet.`)
+          } else {
+            setStatus(`Campus ready — ${layerCount}/7 campus layers · ${boothRecords.length} polling booths.`)
+          }
         } catch (error) {
           console.warn('Could not load polling booths:', error)
-          if (!cancelled) setStatus(`Campus ready — ${layerCount}/7 campus layers · polling booth data unavailable.`)
+          if (!cancelled) {
+            setBooths([])
+            setSelectedBooth(null)
+            setStatus(`Campus ready — ${layerCount}/7 campus layers · polling booth data unavailable. ${safeErrorMessage(error, 'Check the booth dataset.')}`)
+          }
         }
       } catch (error) {
-        console.error(error)
-        if (!cancelled) setStatus('3D viewer could not initialize. Check the browser console.')
+        console.error('3D viewer initialization failed:', error)
+        if (!cancelled) setStatus(`3D viewer could not initialize. ${safeErrorMessage(error, 'Check browser compatibility and viewer configuration.')}`)
       }
     }
+
     void initialize()
     return () => { cancelled = true; viewer?.destroy(); viewerRef.current = null }
   }, [])
@@ -65,14 +90,30 @@ function App() {
       const entity = picked?.id as Entity | undefined
       const boothId = entity?.properties?.booth_id?.getValue?.()
       const booth = booths.find((item) => item.booth_id === boothId)
-      if (booth) { setSelectedBooth(booth); window.history.pushState({}, '', `/booth/${encodeURIComponent(booth.booth_id.toUpperCase())}`); flyToBooth(viewer, booth) }
+      if (booth) {
+        setSelectedBooth(booth)
+        window.history.pushState({}, '', `/booth/${encodeURIComponent(booth.booth_id.toUpperCase())}`)
+        flyToBooth(viewer, booth)
+      }
     }
     handler.setInputAction(callback, 1)
     return () => handler.removeInputAction(1)
   }, [booths])
 
   useEffect(() => {
-    const onPopState = () => { const booth = resolveBoothFromPath(window.location.pathname, booths); setSelectedBooth(booth ?? null); if (booth && viewerRef.current) flyToBooth(viewerRef.current, booth) }
+    const onPopState = () => {
+      const routeId = boothIdFromPath(window.location.pathname)
+      const booth = resolveBoothFromPath(window.location.pathname, booths)
+      setSelectedBooth(booth ?? null)
+      if (booth && viewerRef.current) {
+        flyToBooth(viewerRef.current, booth)
+        setStatus(`Booth ${booth.booth_no} loaded.`)
+      } else if (routeId) {
+        setStatus(`Booth ${routeId} was not found. Choose a valid booth.`)
+      } else {
+        setStatus(`Campus ready — ${booths.length} polling booths available.`)
+      }
+    }
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
   }, [booths])

@@ -9,55 +9,25 @@
 * { box-sizing: border-box; }
 html, body, #root { width: 100%; height: 100%; margin: 0; }
 body { min-width: 320px; }
-
-.app-shell {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.app-header {
-  min-height: 72px;
-  padding: 12px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: #0f172a;
-  color: #fff;
-  z-index: 2;
-}
-
-.eyebrow {
-  margin: 0 0 2px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  opacity: .75;
-}
-
+.app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.app-header { min-height: 72px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #0f172a; color: #fff; z-index: 2; }
+.eyebrow { margin: 0 0 2px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
 h1 { margin: 0; font-size: 20px; line-height: 1.2; }
 .version { font-size: 12px; opacity: .75; white-space: nowrap; }
 .viewer-section { position: relative; flex: 1; min-height: 0; }
 .cesium-container { position: absolute; inset: 0; }
-.viewer-status {
-  position: absolute;
-  left: 12px;
-  bottom: 12px;
-  max-width: calc(100% - 24px);
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: rgba(15, 23, 42, .88);
-  color: #fff;
-  font-size: 12px;
-  z-index: 1;
-}
-
+.viewer-status { position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px); padding: 8px 10px; border-radius: 8px; background: rgba(15, 23, 42, .88); color: #fff; font-size: 12px; z-index: 1; }
+.data-path { margin-top: 3px; opacity: .7; font-size: 10px; }
+.booth-card { position: absolute; top: 16px; right: 16px; width: min(340px, calc(100% - 32px)); padding: 18px; border-radius: 12px; background: rgba(255,255,255,.96); box-shadow: 0 8px 30px rgba(15,23,42,.25); z-index: 3; }
+.booth-card h2 { margin: 3px 0 12px; font-size: 20px; }
+.booth-card p { margin: 6px 0; font-size: 13px; }
+.booth-kicker { color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; font-size: 11px !important; }
+.booth-close { position: absolute; top: 8px; right: 10px; border: 0; background: transparent; font-size: 25px; cursor: pointer; color: #475569; }
+.verified, .unverified { display: inline-block; margin-top: 10px; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #dcfce7; color: #166534; }
+.unverified { background: #ffedd5; color: #9a3412; }
 @media (max-width: 640px) {
   .app-header { min-height: 64px; padding: 10px 14px; }
   h1 { font-size: 18px; }
   .version { display: none; }
+  .booth-card { top: 10px; right: 10px; width: calc(100% - 20px); }
 }

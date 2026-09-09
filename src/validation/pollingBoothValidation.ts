@@ -20,31 +20,21 @@ function validateBooth(booth: Partial<PollingBooth>, index: number): string[] {
   const match = typeof booth.booth_id === 'string' ? booth.booth_id.trim().match(BOOTH_ID_PATTERN) : null
   const boothNumber = match ? Number(match[1]) : NaN
 
-  if (!match || !Number.isInteger(boothNumber) || boothNumber < 1 || boothNumber > 14) {
-    errors.push(`${label}: invalid booth_id; expected PB01–PB14.`)
-  }
+  if (!match || !Number.isInteger(boothNumber) || boothNumber < 1 || boothNumber > 14) errors.push(`${label}: invalid booth_id; expected PB01–PB14.`)
 
   for (const [field, value] of [
-    ['booth_no', booth.booth_no],
-    ['booth_name', booth.booth_name],
-    ['venue', booth.venue],
-    ['building_name', booth.building_name],
-    ['status', booth.status],
-    ['source', booth.source],
+    ['booth_no', booth.booth_no], ['booth_name', booth.booth_name], ['venue', booth.venue],
+    ['building_name', booth.building_name], ['status', booth.status], ['source', booth.source],
     ['election_source', booth.election_source],
   ] as const) {
-    if ((typeof value !== 'string' && field !== 'booth_no') || (typeof value === 'string' && !value.trim())) {
-      errors.push(`${label}: missing required field ${field}.`)
-    }
+    if ((typeof value !== 'string' && field !== 'booth_no') || (typeof value === 'string' && !value.trim())) errors.push(`${label}: missing required field ${field}.`)
   }
 
-  if (!Number.isInteger(booth.booth_no) || booth.booth_no < 1 || booth.booth_no > 14) {
-    errors.push(`${label}: invalid booth_no.`)
-  }
+  if (!Number.isInteger(booth.booth_no) || booth.booth_no < 1 || booth.booth_no > 14) errors.push(`${label}: invalid booth_no.`)
   if (!Array.isArray(booth.voter_groups)) errors.push(`${label}: voter_groups must be an array.`)
   if (!VALID_STATUSES.has(booth.status as PollingBooth['status'])) errors.push(`${label}: invalid status.`)
   if (typeof booth.verified !== 'boolean') errors.push(`${label}: verified must be true or false.`)
-  if (booth.dummy !== false) errors.push(`${label}: dummy must be false in the official master dataset.`)
+  if (typeof booth.dummy !== 'boolean') errors.push(`${label}: dummy must be true or false.`)
 
   const spatialPairs = [
     ['polling coordinates', booth.latitude, booth.longitude, -90, 90, -180, 180],
@@ -63,6 +53,7 @@ function validateBooth(booth: Partial<PollingBooth>, index: number): string[] {
     if (!booth.building_id) errors.push(`${label}: verified booth requires building_id.`)
     if (!booth.entrance_id) errors.push(`${label}: verified booth requires entrance_id.`)
     if (!booth.verification_date) errors.push(`${label}: verified booth requires verification_date.`)
+    if (booth.dummy) errors.push(`${label}: verified booth cannot be marked dummy.`)
   }
 
   return errors
@@ -83,12 +74,9 @@ export function validatePollingBooths(booths: PollingBooth[]): BoothValidationRe
     if (boothErrors.length) errors.push(...boothErrors)
     else validBooths.push({ ...booth, booth_id: normalizedId })
 
-    if (booth.latitude === null || booth.navigation_lat === null) {
-      warnings.push(`${normalizedId || `record ${index + 1}`}: spatial verification pending; map marker and navigation are disabled.`)
-    }
-    if (booth.status === 'inactive' || booth.status === 'closed') {
-      warnings.push(`${normalizedId || `record ${index + 1}`}: navigation is disabled because the booth is ${booth.status}.`)
-    }
+    if (booth.dummy) warnings.push(`${normalizedId || `record ${index + 1}`}: DEMO spatial record; replace before production.`)
+    if (booth.latitude === null || booth.navigation_lat === null) warnings.push(`${normalizedId || `record ${index + 1}`}: spatial verification pending; map marker and navigation are disabled.`)
+    if (booth.status === 'inactive' || booth.status === 'closed') warnings.push(`${normalizedId || `record ${index + 1}`}: navigation is disabled because the booth is ${booth.status}.`)
   })
 
   if (validBooths.length !== 14) errors.push(`Expected exactly 14 polling booths; found ${validBooths.length}.`)

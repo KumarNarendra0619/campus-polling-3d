@@ -1,5 +1,6 @@
 import { Cartesian3, Color, GeoJsonDataSource, LabelStyle, VerticalOrigin } from 'cesium'
 import type { PollingBooth } from '../types/pollingBooth'
+import { validatePollingBooths } from '../validation/pollingBoothValidation'
 
 const DATA_URL = '/data/polling_booths.geojson'
 
@@ -14,7 +15,7 @@ export async function loadPollingBooths(): Promise<PollingBooth[]> {
     throw new Error('Invalid polling_booths.geojson: expected a FeatureCollection.')
   }
 
-  return json.features
+  const records = json.features
     .filter((feature: any) => feature?.geometry?.type === 'Point' && feature?.properties?.booth_id)
     .map((feature: any) => {
       const coordinates = feature.geometry.coordinates
@@ -27,6 +28,14 @@ export async function loadPollingBooths(): Promise<PollingBooth[]> {
         navigation_lon: Number(properties.navigation_lon),
       } as PollingBooth
     })
+
+  const result = validatePollingBooths(records)
+  if (result.errors.length) {
+    throw new Error(`Polling booth validation failed: ${result.errors.join(' ')}`)
+  }
+
+  for (const warning of result.warnings) console.warn(warning)
+  return result.validBooths
 }
 
 export function createBoothDataSource(booths: PollingBooth[]) {

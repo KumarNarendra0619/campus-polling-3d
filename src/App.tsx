@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Entity, Ion, Terrain, Viewer } from 'cesium'
+import { Cartesian3, EllipsoidTerrainProvider, Entity, Ion, Viewer } from 'cesium'
 import 'cesium/Build/Cesium/Widgets/widgets.css'
 import { CAMPUS_LAYERS, loadGeoJsonLayer, type CampusLayerName } from './services/geojson'
 import { createBoothDataSource, loadPollingBooths } from './services/pollingBooths'
@@ -10,6 +10,7 @@ import { GroundView } from './components/GroundView'
 import type { PollingBooth } from './types/pollingBooth'
 
 const LAYER_ORDER: CampusLayerName[] = ['boundary', 'buildings', 'roads', 'footpaths', 'gates', 'treesGreen', 'amenities']
+const CAMPUS_CENTER = { lon: 78.78235, lat: 30.22129 }
 
 function safeErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error && error.message ? error.message : fallback
@@ -29,10 +30,28 @@ function App() {
 
     const initialize = async () => {
       try {
-        viewer = new Viewer(containerRef.current!, { animation: false, timeline: false, baseLayerPicker: false, geocoder: false, homeButton: true, navigationHelpButton: false, sceneModePicker: false, selectionIndicator: true, infoBox: false })
+        const ionToken = import.meta.env.VITE_CESIUM_ION_TOKEN as string | undefined
+        if (ionToken) Ion.defaultAccessToken = ionToken
+
+        viewer = new Viewer(containerRef.current!, {
+          animation: false,
+          timeline: false,
+          baseLayerPicker: false,
+          geocoder: false,
+          homeButton: true,
+          navigationHelpButton: false,
+          sceneModePicker: false,
+          selectionIndicator: true,
+          infoBox: false,
+        })
         viewerRef.current = viewer
         viewer.scene.globe.show = true
-        viewer.scene.terrainProvider = Terrain.fromWorldTerrain()
+        viewer.scene.terrainProvider = ionToken ? await TerrainProviderFromIon() : new EllipsoidTerrainProvider()
+        viewer.camera.flyTo({
+          destination: Cartesian3.fromDegrees(CAMPUS_CENTER.lon, CAMPUS_CENTER.lat, 650),
+          duration: 0.8,
+        })
+
         let layerCount = 0
         for (const layer of LAYER_ORDER) {
           if (cancelled) return
@@ -55,13 +74,13 @@ function App() {
           if (routeBooth) {
             setSelectedBooth(routeBooth)
             flyToBooth(viewer, routeBooth)
-            setStatus(`Booth ${routeBooth.booth_no} loaded — verified navigation record.`)
+            setStatus(`Booth ${routeBooth.booth_no} loaded — DEMO spatial record.`)
           } else if (routeId) {
             setStatus(`Booth ${routeId} was not found. Check the booth QR/link and choose a valid booth.`)
           } else if (boothRecords.length === 0) {
             setStatus(`Campus ready — ${layerCount}/7 campus layers. Polling booth records are not available yet.`)
           } else {
-            setStatus(`Campus ready — ${layerCount}/7 campus layers · ${boothRecords.length} polling booths.`)
+            setStatus(`Campus ready — ${layerCount}/7 campus layers · ${boothRecords.length} polling booths · DEMO spatial data.`)
           }
         } catch (error) {
           console.warn('Could not load polling booths:', error)
@@ -107,7 +126,7 @@ function App() {
       setSelectedBooth(booth ?? null)
       if (booth && viewerRef.current) {
         flyToBooth(viewerRef.current, booth)
-        setStatus(`Booth ${booth.booth_no} loaded.`)
+        setStatus(`Booth ${booth.booth_no} loaded — DEMO spatial record.`)
       } else if (routeId) {
         setStatus(`Booth ${routeId} was not found. Choose a valid booth.`)
       } else {
@@ -122,16 +141,16 @@ function App() {
 
   return (
     <main className="app-shell">
-      <header className="app-header"><div><p className="eyebrow">University Election</p><h1>Campus Polling 3D</h1></div><span className="version">MVP v0.1</span></header>
+      <header className="app-header"><div><p className="eyebrow">University Election</p><h1>Campus Polling 3D</h1></div><span className="version">MVP v0.1 · DEMO DATA</span></header>
       <section className="viewer-section" aria-label="3D campus viewer">
         <div ref={containerRef} className="cesium-container" />
-        <div className="viewer-status" role="status"><strong>{status}</strong><div className="data-path">Data source: {CAMPUS_LAYERS.buildings}</div></div>
+        <div className="viewer-status" role="status"><strong>{status}</strong><div className="data-path">Campus 3D: demo building footprints · Booth locations: demo coordinates</div></div>
         {selectedBooth && <aside className="booth-card" aria-label="Polling booth details">
           <button className="booth-close" onClick={closeBooth} aria-label="Close">×</button>
           <p className="booth-kicker">Polling Booth {selectedBooth.booth_no}</p>
           <h2>{selectedBooth.booth_name}</h2>
-          <p><strong>Building:</strong> {selectedBooth.building_name}</p><p><strong>Room:</strong> {selectedBooth.room_no}</p><p><strong>Floor:</strong> {selectedBooth.floor}</p><p><strong>Entrance:</strong> {selectedBooth.entrance_id}</p>
-          <span className={selectedBooth.verified ? 'verified' : 'unverified'}>{selectedBooth.verified ? 'Verified booth location' : 'Location needs verification'}</span>
+          <p><strong>Building:</strong> {selectedBooth.building_name}</p><p><strong>Room:</strong> {selectedBooth.room_no}</p><p><strong>Floor:</strong> {selectedBooth.floor ?? '—'}</p><p><strong>Entrance:</strong> {selectedBooth.entrance_id ?? '—'}</p>
+          <span className={selectedBooth.verified ? 'verified' : 'unverified'}>{selectedBooth.verified ? 'Verified booth location' : 'DEMO — location needs verification'}</span>
           <GroundView booth={selectedBooth} /><NavigationButton booth={selectedBooth} />
         </aside>}
       </section>
@@ -139,5 +158,9 @@ function App() {
   )
 }
 
-void Ion
+async function TerrainProviderFromIon() {
+  const { Terrain } = await import('cesium')
+  return Terrain.fromWorldTerrain()
+}
+
 export default App
